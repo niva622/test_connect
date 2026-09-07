@@ -1,7 +1,7 @@
 #!/bin/sh
 # На VPS (от root):
 #   wget -qO- https://raw.githubusercontent.com/USER/REPO/main/server/install_server.sh | sh -s -- -t СЕКРЕТ [-p 8080]
-REPO="https://raw.githubusercontent.com/niva622/test_connect/main"
+REPO="https://raw.githubusercontent.com/USER/REPO/main/server"
 TOKEN=""; PORT=8080
 while [ $# -gt 0 ]; do
     case "$1" in
