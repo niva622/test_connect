@@ -51,8 +51,6 @@ nap() {
 
 # url-encode любых байт (UTF-8 в имени роутера — не проблема)
 urlenc() {
-    printf '%s' "$1" | od -An -v -tx1 | tr -d ' \n' | sed 's/../%&/g'
-}
 
 cleanup() {
     [ -n "$SLEEP_PID" ] && kill "$SLEEP_PID" 2>/dev/null
