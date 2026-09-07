@@ -1,0 +1,13 @@
+[Unit]
+Description=sitemon server
+After=network.target
+
+[Service]
+User=sitemon
+EnvironmentFile=/etc/sitemon.env
+ExecStart=/usr/bin/python3 /opt/sitemon/sitemon_server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
