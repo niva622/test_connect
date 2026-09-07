@@ -13,13 +13,13 @@ ROUTER_NAME="$(cat /proc/sys/kernel/hostname 2>/dev/null || echo router)"
 SITES="https://ya.ru https://google.com"
 SERVER_URL="http://127.0.0.1:8080/report"
 TOKEN="changeme"
-INTERVAL=3600           # период проверки, сек
-RETRY_DELAY=300         # пауза перед повторной проверкой, сек
-MAX_ATTEMPTS=3          # 1 проверка + 2 повтора
-SEND_ATTEMPTS=2         # попыток отправки на VPS
-SEND_RETRY_DELAY=30     # пауза между попытками отправки
-HTTP_TIMEOUT=30         # таймаут wget, сек
-QUOTA=10m               # лимит скачивания при полной загрузке
+INTERVAL=3600
+RETRY_DELAY=300
+MAX_ATTEMPTS=3
+SEND_ATTEMPTS=2
+SEND_RETRY_DELAY=30
+HTTP_TIMEOUT=30
+QUOTA=10m
 
 SLEEP_PID=""
 
@@ -28,20 +28,17 @@ load_conf() { [ -f "$CONF" ] && . "$CONF"; }
 log() {
     mkdir -p "$(dirname "$LOG")" 2>/dev/null
     echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"
-    # ротация: не даём логу расти бесконечно
     if [ "$(wc -c < "$LOG" 2>/dev/null || echo 0)" -gt "$LOG_MAX" ]; then
         tail -n 300 "$LOG" > "$LOG.tmp" 2>/dev/null && mv "$LOG.tmp" "$LOG"
     fi
 }
 
-# миллисекунды из /proc/uptime ("12345.67 ...")
 now_ms() {
     local up rest
     read up rest < /proc/uptime
     echo "${up%.*}${up#*.}0"
 }
 
-# прерываемый sleep (чтобы stop срабатывал сразу)
 nap() {
     sleep "$1" &
     SLEEP_PID=$!
@@ -49,8 +46,6 @@ nap() {
     SLEEP_PID=""
 }
 
-# url-encode любых байт (UTF-8 в имени роутера — не проблема)
-# url-encode любых байт (UTF-8 в имени роутера — не проблема)
 urlenc() {
     printf '%s' "$1" | od -b | awk '{
         for (i=2; i<=NF; i++) {
@@ -71,7 +66,6 @@ cleanup() {
 }
 trap cleanup TERM INT
 
-# Проверка одного сайта. Выводит: STATUS|open_ms|full_ms
 check_site() {
     local url="$1" t0 t1 status=FAIL open=0 full=0
 
@@ -83,7 +77,6 @@ check_site() {
 
         rm -rf "$TMPDIR"; mkdir -p "$TMPDIR"
         t0=$(now_ms)
-        # -p: страница со всеми ресурсами, -H: в т.ч. с CDN, -Q: лимит объёма
         wget -q -p -H -nd -e robots=off -Q "$QUOTA" -P "$TMPDIR" \
              -T "$HTTP_TIMEOUT" -t 1 --no-check-certificate "$url" >/dev/null 2>&1
         t1=$(now_ms)
@@ -93,7 +86,6 @@ check_site() {
     echo "$status|$open|$full"
 }
 
-# Отправка отчёта. $1 = данные, $2 = номер попытки проверки
 send_report() {
     local body
     body="token=$(urlenc "$TOKEN")&name=$(urlenc "$ROUTER_NAME")&attempt=$2&data=$(urlenc "$1")"
@@ -101,16 +93,14 @@ send_report() {
          --post-data="$body" "$SERVER_URL" 2>/dev/null
 }
 
-# ----------------------------------------------------------------
 mkdir -p "$(dirname "$PIDFILE")" /opt/tmp 2>/dev/null
 echo $$ > "$PIDFILE"
 load_conf
 log "запущен: name=$ROUTER_NAME sites=[$SITES] server=$SERVER_URL"
 
 while :; do
-    load_conf   # изменения в конфиге подхватываются без рестарта
+    load_conf
 
-    # --- фаза проверки (до MAX_ATTEMPTS раз) ---
     attempt=1
     while :; do
         RESULTS=""; ALL_OK=1
@@ -127,7 +117,6 @@ while :; do
         nap "$RETRY_DELAY"
     done
 
-    # --- фаза отправки (до SEND_ATTEMPTS раз) ---
     sent=0; s=1
     while [ "$s" -le "$SEND_ATTEMPTS" ]; do
         if send_report "$RESULTS" "$attempt"; then
