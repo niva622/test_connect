@@ -11,7 +11,7 @@ case "$1" in
     start)
         if running; then echo "sitemon уже запущен"; exit 0; fi
         mkdir -p /opt/var/run /opt/var/log
-        nohup "$BIN" >/dev/null 2>&1 &
+        "$BIN" >/dev/null 2>&1 &
         echo "sitemon запущен"
         ;;
     stop)
