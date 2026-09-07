@@ -50,7 +50,17 @@ nap() {
 }
 
 # url-encode любых байт (UTF-8 в имени роутера — не проблема)
+# url-encode любых байт (UTF-8 в имени роутера — не проблема)
 urlenc() {
+    printf '%s' "$1" | od -b | awk '{
+        for (i=2; i<=NF; i++) {
+            if ($i == "") continue
+            v = $i; dec = 0; n = length(v)
+            for (j=1; j<=n; j++) { dec = dec*8 + (substr(v,j,1)+0) }
+            printf "%%%02x", dec
+        }
+    }'
+}
 
 cleanup() {
     [ -n "$SLEEP_PID" ] && kill "$SLEEP_PID" 2>/dev/null
