@@ -5,7 +5,7 @@
 # Удаление:
 #   wget -qO- https://raw.githubusercontent.com/USER/REPO/main/install.sh | sh -s -- --uninstall
 
-REPO="https://raw.githubusercontent.com/USER/REPO/main"
+REPO="https://raw.githubusercontent.com/niva622/test_connect/main"
 CONF=/opt/etc/sitemon.conf
 NAME=""; SERVER=""; TOKEN=""; SITES=""; UNINSTALL=0
 
