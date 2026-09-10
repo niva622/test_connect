@@ -1,0 +1,36 @@
+#!/bin/sh
+PATH=/opt/sbin:/opt/bin:/usr/sbin:/usr/bin:/sbin:/bin
+BIN=/opt/bin/sitemon.sh
+PIDFILE=/opt/var/run/sitemon.pid
+
+running() {
+    [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
+}
+
+case "$1" in
+    start)
+        if running; then echo "sitemon uzhe zapushen"; exit 0; fi
+        mkdir -p /opt/var/run /opt/var/log
+        "$BIN" >/dev/null 2>&1 &
+        echo "sitemon zapushen"
+        ;;
+    stop)
+        if running; then
+            kill "$(cat "$PIDFILE")"
+            sleep 1
+            echo "sitemon ostanovlen"
+        else
+            echo "sitemon ne zapushen"
+        fi
+        rm -f "$PIDFILE"
+        ;;
+    restart)
+        "$0" stop; sleep 1; "$0" start
+        ;;
+    status)
+        if running; then echo "sitemon rabotaet (pid $(cat "$PIDFILE"))"; else echo "sitemon ne zapushen"; fi
+        ;;
+    *)
+        echo "Ispolzovanie: $0 {start|stop|restart|status}"
+        ;;
+esac
