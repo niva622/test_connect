@@ -1,7 +1,7 @@
 #!/bin/sh
 # check-site.sh - проверка загрузки страницы (с ресурсами) через туннель.
 # Для BusyBox/Entware. Нужен curl (opkg install curl), grep, sed, sort, tr.
-#
+# Вот так запускать на роутере curl -fsSL https://github.com/niva622/test_connect/raw/refs/heads/main/check-site.sh | sh -s -- -i opkgtun12 -T
 # Использование:
 #   sh check-site.sh [-i интерфейс] [-u URL] [-m макс_ресурсов] [-t таймаут] [-T]
 #
